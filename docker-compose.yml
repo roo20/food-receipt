@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  telegram-bot:
+    build: .
+    container_name: food-receipt-bot
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - ALLOWED_USER_ID=${ALLOWED_USER_ID}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    env_file:
+      - .env
+    volumes:
+      # Optional: Mount logs directory
+      - ./logs:/app/logs
+    networks:
+      - bot-network
+    # Uncomment to limit resources
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 256M
+    #       cpus: '0.5'
+
+networks:
+  bot-network:
+    driver: bridge
+
+# Optional: Add volume for persistent data
+volumes:
+  bot-data:
+    driver: local
