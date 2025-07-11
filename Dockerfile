@@ -15,7 +15,8 @@ RUN apt-get update && apt-get install -y \
     libgirepository1.0-dev \
     pkg-config \
     && rm -rf /var/lib/apt/lists/* \
-    && fc-cache -fv
+    && fc-cache -fv \
+    && apt-get clean
 
 # Copy requirements first for better caching
 COPY requirements.txt .
@@ -36,7 +37,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Health check
-HEALTHCHECK --interval=3600s --timeout=10s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=36000s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import requests; requests.get('https://api.telegram.org', timeout=5)" || exit 1
 
 # Run the application

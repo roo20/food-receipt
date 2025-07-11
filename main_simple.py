@@ -32,6 +32,10 @@ logging.basicConfig(
     level=getattr(logging, log_level, logging.INFO),
     handlers=log_handlers
 )
+
+# Disable httpx verbose logging
+logging.getLogger('httpx').setLevel(logging.WARNING)
+
 logger = logging.getLogger(__name__)
 
 class FoodReceiptGenerator:
@@ -60,7 +64,7 @@ class FoodReceiptGenerator:
         
         while days_found < days_back:
             # Monday = 0, Sunday = 6 (so 0-4 are weekdays)
-            if current_date.weekday() < 5:  # Monday to Friday
+            if current_date.weekday() < 7:  # Monday to Friday
                 working_days.append(current_date)
                 days_found += 1
             current_date -= timedelta(days=1)
@@ -662,6 +666,26 @@ class TelegramBot:
     def run(self):
         """Start the bot"""
         logger.info("Starting bot...")
+        # Try to get Docker image information if available
+        docker_info = "Not running in Docker"
+        try:
+            # Check if running in Docker by looking for .dockerenv file or cgroup
+            if os.path.exists('/.dockerenv') or '/docker' in open('/proc/1/cgroup', 'r').read():
+                # Try to get image info from environment variables
+                image_name = os.getenv('DOCKER_IMAGE_NAME', 'Unknown')
+                image_tag = os.getenv('DOCKER_IMAGE_TAG', 'Unknown')
+                image_sha = os.getenv('DOCKER_IMAGE_SHA', 'Unknown')
+                
+                docker_info = f"Docker Image: {image_name}:{image_tag}"
+                if image_sha != 'Unknown':
+                    docker_info += f" (SHA: {image_sha})"
+                
+                logger.info(f"Running in Docker container: {docker_info}")
+            else:
+                logger.info("Not running in Docker container")
+        except Exception as e:
+            logger.debug(f"Error detecting Docker environment: {e}")
+
         self.application.run_polling()
 
 
