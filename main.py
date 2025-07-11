@@ -127,7 +127,7 @@ freundlichen Öffnungszeiten am Markt
         
         while days_found < days_back:
             # Monday = 0, Sunday = 6 (so 0-4 are weekdays)
-            if current_date.weekday() < 5:  # Monday to Friday
+            if current_date.weekday() < 7:  # all weekdays
                 working_days.append(current_date)
                 days_found += 1
             current_date -= timedelta(days=1)
