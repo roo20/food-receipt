@@ -120,19 +120,14 @@ freundlichen Öffnungszeiten am Markt
 """
 
     def get_working_days(self, days_back: int) -> List[datetime]:
-        """Get list of working days going back from today"""
-        working_days = []
+        """Get list of days going back from today (including weekends)"""
+        days = []
         current_date = datetime.now()
-        days_found = 0
         
-        while days_found < days_back:
-            # Monday = 0, Sunday = 6 (so 0-4 are weekdays)
-            if current_date.weekday() < 7:  # all weekdays
-                working_days.append(current_date)
-                days_found += 1
-            current_date -= timedelta(days=1)
+        for i in range(days_back):
+            days.append(current_date - timedelta(days=i))
         
-        return list(reversed(working_days))  # Return in chronological order
+        return list(reversed(days))  # Return in chronological order
 
     def generate_random_shopping_cart(self) -> List[Dict[str, Any]]:
         """Generate a random shopping cart with total over 7 EUR"""
@@ -285,7 +280,7 @@ class TelegramBot:
             return
         
         await update.message.reply_text(
-            "Welcome! Send me a message like 'food 5' or 'Food 3' to generate receipts for the last N working days."
+            "Welcome! Send me a message like 'food 5' or 'Food 3' to generate receipts for the last N days."
         )
 
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -306,9 +301,9 @@ class TelegramBot:
                     await update.message.reply_text("Please specify a number between 1 and 30.")
                     return
                 
-                await update.message.reply_text(f"Generating receipts for the last {days_back} working days...")
+                await update.message.reply_text(f"Generating receipts for the last {days_back} days...")
                 
-                # Get working days
+                # Get days
                 working_days = self.receipt_generator.get_working_days(days_back)
                 
                 # Generate and send receipts
